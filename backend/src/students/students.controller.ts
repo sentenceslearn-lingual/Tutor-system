@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { StudentsService } from './students.service';
 
 @Controller('students')
@@ -9,15 +9,20 @@ export class StudentsController {
   ) {}
 
   @Post('register')
-  registerStudent() {
+  async registerStudent(
+    @Body() data: any,
+  ) {
 
-    const studentId =
-      this.studentsService.generateStudentId();
+    console.log('========== REQUEST RECEIVED ==========');
+    console.log(data);
 
-    return {
-      message: 'Registration successful',
-      studentId,
-    };
+    const result =
+      await this.studentsService.registerStudent(data);
+
+    console.log('========== DATABASE RESULT ==========');
+    console.log(result);
+
+    return result;
   }
 
 }

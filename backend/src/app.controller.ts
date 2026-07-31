@@ -1,21 +1,16 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
+import { AppService } from './app.service';
 
 @Controller()
 export class AppController {
+
+  constructor(
+    private readonly appService: AppService,
+  ) {}
+
   @Get()
-  getHello() {
-    return { message: 'Sentences Backend API is running' };
+  getHello(): string {
+    return this.appService.getHello();
   }
 
-  @Post('students/register')
-  registerStudent(@Body() body: any) {
-    const studentId = 'ST2026001';
-
-    return {
-      success: true,
-      studentId,
-      status: 'PENDING_PAYMENT',
-      receivedData: body,
-    };
-  }
 }

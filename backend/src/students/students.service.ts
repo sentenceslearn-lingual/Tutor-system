@@ -1,22 +1,58 @@
 import { Injectable } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class StudentsService {
 
-  private studentCounter = 1;
+  constructor(
+    private readonly prisma: PrismaService,
+  ) {}
 
-  generateStudentId() {
-    const year = new Date().getFullYear();
 
-    const number = this.studentCounter
-      .toString()
-      .padStart(3, '0');
+  async registerStudent(data: any) {
 
-    const studentId = `ST${year}${number}`;
+    console.log('DATA FROM FRONTEND:', data);
 
-    this.studentCounter++;
 
-    return studentId;
+    const studentId = `ST${new Date().getFullYear()}001`;
+
+
+    const student = await this.prisma.student.create({
+
+      data: {
+
+        studentId,
+
+        fullName: data.fullName,
+
+        certificateName: data.certificateName,
+
+        email: data.email,
+
+        phone: data.phone,
+
+        languages: data.languages,
+
+        packageHours: Number(data.packageHours),
+
+        packagePrice: Number(data.packagePrice),
+
+      },
+
+    });
+
+
+    console.log('DATABASE SAVED:', student);
+
+
+    return {
+
+      message: 'Registration successful',
+
+      studentId: student.studentId,
+
+    };
+
   }
 
 }
