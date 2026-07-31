@@ -2,11 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { API_URL } from "@/lib/api";
 
 export default function LessonsPage() {
-
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
 
   const searchParams = useSearchParams();

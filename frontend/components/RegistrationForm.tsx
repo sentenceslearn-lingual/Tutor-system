@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { API_URL } from '@/lib/api';
 
 const packageData = {
   '1': { hours: 1, price: 200, discount: 0 },
@@ -42,8 +43,8 @@ export default function RegistrationForm() {
     try {
 
       const response = await fetch(
-        'http://localhost:3002/students/register',
-        {
+  `${API_URL}/students/register`,
+  {
 
           method: 'POST',
 

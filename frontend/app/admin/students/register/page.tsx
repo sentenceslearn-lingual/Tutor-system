@@ -2,12 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { API_URL } from "@/lib/api";
 
 export default function RegisterStudentPage() {
   const router = useRouter();
-
-  const API_URL =
-    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
   const [form, setForm] = useState({
     fullName: "",

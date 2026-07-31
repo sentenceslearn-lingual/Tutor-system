@@ -2,24 +2,24 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { API_URL } from "@/lib/api";
 
 
-export default function AdminDashboard(){
+export default function StudentsPage() {
 
 
 const [students,setStudents] =
 useState<any[]>([]);
 
 
-const [lessons,setLessons] =
-useState<any[]>([]);
-
+const [search,setSearch] =
+useState("");
 
 
 
 useEffect(()=>{
 
-loadData();
+loadStudents();
 
 },[]);
 
@@ -27,93 +27,167 @@ loadData();
 
 
 
+async function loadStudents(){
 
-async function loadData(){
+
+try{
 
 
-const studentRes =
+const res =
 await fetch(
-"http://localhost:3002/students"
+`${API_URL}/students`,
+{
+cache:"no-store"
+}
 );
 
 
-const studentData =
-await studentRes.json();
 
-
-setStudents(studentData);
-
+const data =
+await res.json();
 
 
 
+const studentsWithHours =
+await Promise.all(
 
-let allLessons:any[] = [];
-
-
-for(const student of studentData){
+data.map(async(student:any)=>{
 
 
 const lessonRes =
 await fetch(
 
-`http://localhost:3002/lessons/student/${student.studentId}`
+`${API_URL}/lessons/student/${student.studentId}`,
+
+{
+cache:"no-store"
+}
 
 );
 
 
-const lessonData =
+
+const lessons =
 await lessonRes.json();
 
 
-if(Array.isArray(lessonData)){
 
-allLessons =
-[
-...allLessons,
-...lessonData
-];
+const usedHours =
+Array.isArray(lessons)
 
-}
+?
 
-
-}
-
-
-setLessons(allLessons);
-
-
-}
-
-
-
-
-
-const totalRevenue =
-students.reduce(
-
-(sum,student)=>
-
-sum +
-Number(student.packagePrice || 0),
-
-0
-
-);
-
-
-
-
-const totalHours =
 lessons.reduce(
-
-(sum,lesson)=>
-
-sum +
-Number(lesson.hours || 0),
-
+(sum:number,lesson:any)=>
+sum + Number(lesson.hours || 0),
 0
+)
+
+:
+
+0;
+
+
+
+return {
+
+...student,
+
+usedHours,
+
+remainingHours:
+Number(student.packageHours || 0)
+-
+usedHours
+
+};
+
+
+
+})
 
 );
+
+
+
+setStudents(studentsWithHours);
+
+
+
+}
+
+catch(error){
+
+console.log(error);
+
+}
+
+
+}
+
+
+
+
+
+
+
+async function deleteStudent(id:string){
+
+
+const ok =
+confirm(
+"Delete this student?"
+);
+
+
+
+if(!ok) return;
+
+
+
+await fetch(
+
+`${API_URL}/students/${id}`,
+
+{
+method:"DELETE"
+}
+
+);
+
+
+
+loadStudents();
+
+
+}
+
+
+
+
+
+
+
+
+const filteredStudents =
+students.filter(
+
+(student)=>
+
+student.fullName
+.toLowerCase()
+.includes(
+search.toLowerCase()
+)
+
+||
+
+student.studentId
+.includes(search)
+
+);
+
+
 
 
 
@@ -121,7 +195,6 @@ Number(lesson.hours || 0),
 
 
 return (
-
 
 <main className="min-h-screen bg-slate-900 p-10">
 
@@ -130,114 +203,26 @@ return (
 
 
 
+<div className="flex justify-between items-center mb-8">
 
 
-<h1 className="text-4xl font-bold text-white mb-2">
+<div>
 
-📊 Tutor Management Dashboard
+<h1 className="text-4xl font-bold text-white">
+
+👨‍🎓 Student Management
 
 </h1>
 
 
-<p className="text-slate-400 mb-10">
+<p className="text-slate-400">
 
-Overview of your language academy
+Manage all students
 
 </p>
 
 
-
-
-
-
-
-
-<div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-
-
-
-
-
-<Card
-
-title="Students"
-
-value={students.length}
-
-color="text-blue-400"
-
-/>
-
-
-
-
-
-<Card
-
-title="Lessons"
-
-value={lessons.length}
-
-color="text-purple-400"
-
-/>
-
-
-
-
-
-<Card
-
-title="Teaching Hours"
-
-value={`${totalHours} hrs`}
-
-color="text-green-400"
-
-/>
-
-
-
-
-
-<Card
-
-title="Revenue"
-
-value={`${totalRevenue.toLocaleString()} THB`}
-
-color="text-yellow-400"
-
-/>
-
-
-
-
 </div>
-
-
-
-
-
-
-
-
-<div className="bg-slate-800 rounded-2xl p-6">
-
-
-<h2 className="text-2xl font-bold text-white mb-6">
-
-Quick Actions
-
-</h2>
-
-
-
-
-
-
-<div className="grid md:grid-cols-3 gap-4">
-
 
 
 
@@ -246,15 +231,7 @@ Quick Actions
 
 href="/admin/students/register"
 
-className="
-bg-green-600
-hover:bg-green-700
-text-white
-font-bold
-p-5
-rounded-xl
-text-center
-"
+className="bg-green-600 text-white px-5 py-3 rounded-xl"
 
 >
 
@@ -263,62 +240,6 @@ text-center
 </Link>
 
 
-
-
-
-
-<Link
-
-href="/admin/students"
-
-className="
-bg-blue-600
-hover:bg-blue-700
-text-white
-font-bold
-p-5
-rounded-xl
-text-center
-"
-
->
-
-👨‍🎓 Manage Students
-
-</Link>
-
-
-
-
-
-
-<Link
-
-href="/admin/lessons"
-
-className="
-bg-purple-600
-hover:bg-purple-700
-text-white
-font-bold
-p-5
-rounded-xl
-text-center
-"
-
->
-
-📚 Manage Lessons
-
-</Link>
-
-
-
-
-</div>
-
-
-
 </div>
 
 
@@ -326,60 +247,177 @@ text-center
 
 
 
-</div>
+<input
 
+placeholder="Search name or student ID..."
 
-</main>
+value={search}
 
-
-);
-
-
+onChange={
+(e)=>setSearch(e.target.value)
 }
 
-
-
-
-
-
-
-function Card({
-
-title,
-
-value,
-
-color,
-
-}:any){
-
-
-return (
-
-<div className="
+className="
+w-full
+mb-8
 bg-slate-800
-rounded-2xl
-p-6
-">
+text-white
+p-4
+rounded-xl
+"
+
+/>
 
 
-<p className="text-slate-400">
 
-{title}
+
+
+
+
+
+<div className="grid md:grid-cols-2 gap-6">
+
+
+{
+
+filteredStudents.map((student)=>(
+
+
+<div
+
+key={student.id}
+
+className="bg-slate-800 rounded-2xl p-6"
+
+>
+
+
+<h2 className="text-xl font-bold text-white">
+
+{student.fullName}
+
+</h2>
+
+
+
+<p className="text-blue-400 mt-1">
+
+🆔 {student.studentId}
 
 </p>
 
 
 
-<h3 className={`text-3xl font-bold mt-2 ${color}`}>
+<p className="text-slate-300 mt-4">
 
-{value}
+🌐 {student.languages || "-"}
 
-</h3>
+</p>
+
+
+
+
+<div className="mt-4 space-y-1 text-sm">
+
+
+<p className="text-slate-300">
+
+📦 Package:
+{student.packageHours} Hours
+
+</p>
+
+
+
+<p className="text-yellow-400">
+
+⏱ Used:
+{student.usedHours} Hours
+
+</p>
+
+
+
+<p className="text-green-400 font-semibold">
+
+✅ Remaining:
+{student.remainingHours} Hours
+
+</p>
+
+
+</div>
+
+
+
+
+
+
+<div className="flex gap-3 mt-6">
+
+
+<Link
+
+href={`/admin/students/${student.studentId}`}
+
+className="bg-purple-600 text-white px-4 py-2 rounded-lg"
+
+>
+
+View
+
+</Link>
+
+
+
+<Link
+
+href={`/admin/students/${student.studentId}/edit`}
+
+className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+
+>
+
+Edit
+
+</Link>
+
+
+
+<button
+
+onClick={()=>
+deleteStudent(student.studentId)
+}
+
+className="bg-red-600 text-white px-4 py-2 rounded-lg"
+
+>
+
+Delete
+
+</button>
 
 
 
 </div>
+
+
+</div>
+
+
+))
+
+}
+
+
+</div>
+
+
+
+</div>
+
+</main>
 
 );
 
