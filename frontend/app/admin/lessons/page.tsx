@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-
 export default function LessonsPage() {
+
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
 
   const searchParams = useSearchParams();
@@ -13,38 +15,40 @@ export default function LessonsPage() {
     searchParams.get("studentId");
 
 
+  const [students, setStudents] = useState<any[]>([]);
+  const [studentId, setStudentId] = useState("");
 
-  const [students,setStudents] = useState<any[]>([]);
+  const [lessons, setLessons] = useState<any[]>([]);
 
-  const [studentId,setStudentId] = useState("");
+  const [title, setTitle] = useState("");
+  const [teacher, setTeacher] = useState("");
+  const [hours, setHours] = useState("");
 
-  const [lessons,setLessons] = useState<any[]>([]);
-
-
-
-  const [title,setTitle] = useState("");
-
-  const [teacher,setTeacher] = useState("");
-
-  const [hours,setHours] = useState("");
+  const [editId, setEditId] = useState<number | null>(null);
 
 
 
-  const [editId,setEditId] = useState<number | null>(null);
+  useEffect(() => {
+
+    loadStudents();
+
+  }, [studentIdFromUrl]);
 
 
 
+  async function loadStudents() {
+
+    try {
+
+      const res = await fetch(
+        `${API_URL}/students`,
+        {
+          cache: "no-store",
+        }
+      );
 
 
-  useEffect(()=>{
-
-
-    fetch("http://localhost:3002/students")
-
-    .then(res=>res.json())
-
-    .then(data=>{
-
+      const data = await res.json();
 
       setStudents(data);
 
@@ -59,53 +63,65 @@ export default function LessonsPage() {
       }
 
 
-    });
+    } catch(error){
 
+      console.log(error);
 
-
-  },[studentIdFromUrl]);
-
-
-
-
-
-
-
-  async function loadLessons(id:string){
-
-
-    if(!id) return;
-
-
-    const res = await fetch(
-      `http://localhost:3002/lessons/student/${id}`
-    );
-
-
-    const data = await res.json();
-
-
-    setLessons(
-      Array.isArray(data)
-      ? data
-      : []
-    );
-
+    }
 
   }
 
 
 
 
+  async function loadLessons(id:string){
+
+    if(!id) return;
+
+
+    try {
+
+      const res = await fetch(
+        `${API_URL}/lessons/student/${id}`,
+        {
+          cache:"no-store",
+        }
+      );
+
+
+      const data = await res.json();
+
+
+      setLessons(
+        Array.isArray(data)
+        ? data
+        : []
+      );
+
+
+    } catch(error){
+
+      console.log(error);
+
+    }
+
+  }
+
 
 
 
   async function saveLesson(){
 
+    if(
+      !studentId ||
+      !title ||
+      !teacher ||
+      !hours
+    ){
 
-    if(!studentId || !title || !teacher || !hours){
-
-      alert("Please fill all fields");
+      alert(
+        "Please fill all fields"
+      );
 
       return;
 
@@ -115,49 +131,61 @@ export default function LessonsPage() {
 
     const url = editId
 
-      ? `http://localhost:3002/lessons/${editId}`
+      ? `${API_URL}/lessons/${editId}`
 
-      : "http://localhost:3002/lessons";
-
-
-
-    await fetch(
-      url,
-      {
-
-        method: editId ? "PUT" : "POST",
-
-        headers:{
-          "Content-Type":"application/json",
-        },
-
-
-        body:JSON.stringify({
-
-          title,
-
-          teacher,
-
-          hours:Number(hours),
-
-          studentId,
-
-        }),
-
-      }
-    );
+      : `${API_URL}/lessons`;
 
 
 
-    clearForm();
+    try {
 
 
-    loadLessons(studentId);
+      await fetch(
+        url,
+        {
 
+          method:
+            editId
+            ? "PUT"
+            : "POST",
+
+
+          headers:{
+            "Content-Type":
+            "application/json",
+          },
+
+
+          body:
+          JSON.stringify({
+
+            title,
+
+            teacher,
+
+            hours:
+              Number(hours),
+
+            studentId,
+
+          }),
+
+        }
+      );
+
+
+      clearForm();
+
+      loadLessons(studentId);
+
+
+    } catch(error){
+
+      console.log(error);
+
+    }
 
   }
-
-
 
 
 
@@ -165,19 +193,23 @@ export default function LessonsPage() {
 
   function editLesson(lesson:any){
 
+    setEditId(
+      lesson.id
+    );
 
-    setEditId(lesson.id);
+    setTitle(
+      lesson.title
+    );
 
-    setTitle(lesson.title);
+    setTeacher(
+      lesson.teacher
+    );
 
-    setTeacher(lesson.teacher);
-
-    setHours(String(lesson.hours));
-
+    setHours(
+      String(lesson.hours)
+    );
 
   }
-
-
 
 
 
@@ -199,39 +231,39 @@ export default function LessonsPage() {
 
 
 
-
-
   async function deleteLesson(id:number){
 
 
-    const ok = confirm(
-      "Delete this lesson?"
-    );
+    const ok =
+      confirm(
+        "Delete this lesson?"
+      );
 
 
     if(!ok) return;
 
 
 
-    await fetch(
+    try {
 
-      `http://localhost:3002/lessons/${id}`,
-
-      {
-        method:"DELETE",
-      }
-
-    );
-
+      await fetch(
+        `${API_URL}/lessons/${id}`,
+        {
+          method:"DELETE",
+        }
+      );
 
 
-    loadLessons(studentId);
+      loadLessons(studentId);
 
+
+    } catch(error){
+
+      console.log(error);
+
+    }
 
   }
-
-
-
 
 
 
@@ -246,416 +278,266 @@ export default function LessonsPage() {
 
 
 
+  return (
 
+    <main className="min-h-screen bg-slate-900 p-10">
 
-return (
+      <div className="max-w-5xl mx-auto">
 
-<main className="min-h-screen bg-slate-900 p-10">
 
+        <h1 className="text-4xl font-bold text-white mb-2">
+          📚 Lesson Management
+        </h1>
 
-<div className="max-w-5xl mx-auto">
 
+        <p className="text-slate-400 mb-8">
+          Manage student's learning history
+        </p>
 
 
-<h1 className="text-4xl font-bold text-white mb-2">
 
-📚 Lesson Management
+        <div className="bg-slate-800 rounded-2xl p-6 mb-8">
 
-</h1>
+          <h2 className="text-xl font-bold text-white mb-4">
+            👤 Student
+          </h2>
 
 
-<p className="text-slate-400 mb-8">
+          <p className="text-slate-300">
+            Name:
+            <span className="text-white font-bold">
+              {" "}
+              {selectedStudent?.fullName}
+            </span>
+          </p>
 
-Manage student's learning history
 
-</p>
+          <p className="text-slate-300">
+            Student ID:
+            <span className="text-blue-400 font-bold">
+              {" "}
+              {selectedStudent?.studentId}
+            </span>
+          </p>
 
 
+        </div>
 
 
 
 
 
-<div className="bg-slate-800 rounded-2xl p-6 mb-8">
+        <div className="bg-slate-800 rounded-2xl p-6 mb-8">
 
 
-<h2 className="text-xl font-bold text-white mb-4">
+          <h2 className="text-xl font-bold text-white mb-5">
 
-👤 Student
+            {editId
+            ? "✏️ Edit Lesson"
+            : "➕ Add New Lesson"}
 
-</h2>
+          </h2>
 
 
+          <div className="grid gap-4">
 
-<div className="text-slate-300">
 
+            <input
+              placeholder="Lesson title"
+              value={title}
+              onChange={
+                e=>setTitle(e.target.value)
+              }
+              className="bg-slate-700 text-white p-3 rounded-lg"
+            />
 
-<p>
 
-Name:
+            <input
+              placeholder="Teacher"
+              value={teacher}
+              onChange={
+                e=>setTeacher(e.target.value)
+              }
+              className="bg-slate-700 text-white p-3 rounded-lg"
+            />
 
-<span className="text-white font-bold">
 
-{" "}
-{selectedStudent?.fullName}
+            <input
+              placeholder="Hours"
+              type="number"
+              value={hours}
+              onChange={
+                e=>setHours(e.target.value)
+              }
+              className="bg-slate-700 text-white p-3 rounded-lg"
+            />
 
-</span>
 
-</p>
 
+            <button
+              onClick={saveLesson}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-lg"
+            >
 
+              {
+                editId
+                ? "Save Changes"
+                : "Add Lesson"
+              }
 
-<p>
+            </button>
 
-Student ID:
 
-<span className="text-blue-400 font-bold">
 
-{" "}
-{selectedStudent?.studentId}
+            {
+              editId &&
 
-</span>
+              <button
+                onClick={clearForm}
+                className="bg-gray-600 text-white font-bold p-3 rounded-lg"
+              >
+                Cancel
+              </button>
 
-</p>
+            }
 
 
+          </div>
 
-</div>
 
+        </div>
 
-</div>
 
 
 
 
+        <div className="bg-slate-800 rounded-2xl p-6">
 
 
+          <div className="flex justify-between mb-5">
 
+            <h2 className="text-xl font-bold text-white">
+              📖 Lesson History ({lessons.length})
+            </h2>
 
 
-<div className="bg-slate-800 rounded-2xl p-6 mb-8">
+            <button
+              onClick={()=>loadLessons(studentId)}
+              className="bg-green-600 px-4 py-2 rounded-lg text-white"
+            >
+              Refresh
+            </button>
 
 
-<h2 className="text-xl font-bold text-white mb-5">
+          </div>
 
-{editId ? "✏️ Edit Lesson" : "➕ Add New Lesson"}
 
-</h2>
 
 
 
+          {
+            lessons.length === 0
 
+            ?
 
-<div className="grid gap-4">
+            <p className="text-slate-400">
+              No lessons found
+            </p>
 
 
+            :
 
-<input
 
-placeholder="Lesson title"
+            <div className="grid gap-4">
 
-value={title}
+            {
+              lessons.map((lesson)=>(
 
-onChange={
-e=>setTitle(e.target.value)
-}
+                <div
+                  key={lesson.id}
+                  className="bg-slate-700 rounded-xl p-5 border border-slate-600"
+                >
 
-className="bg-slate-700 text-white p-3 rounded-lg"
+                  <div className="flex justify-between items-center">
 
-/>
 
+                    <h3 className="text-xl font-bold text-white">
+                      {lesson.title}
+                    </h3>
 
 
+                    <div className="flex gap-2">
 
 
-<input
+                      <button
+                        onClick={()=>editLesson(lesson)}
+                        className="bg-yellow-500 px-4 py-2 rounded-lg text-white"
+                      >
+                        Edit
+                      </button>
 
-placeholder="Teacher"
 
-value={teacher}
+                      <button
+                        onClick={()=>deleteLesson(lesson.id)}
+                        className="bg-red-600 px-4 py-2 rounded-lg text-white"
+                      >
+                        Delete
+                      </button>
 
-onChange={
-e=>setTeacher(e.target.value)
-}
 
-className="bg-slate-700 text-white p-3 rounded-lg"
+                    </div>
 
-/>
 
+                  </div>
 
 
 
+                  <p className="text-slate-300 mt-3">
+                    👨‍🏫 {lesson.teacher}
+                  </p>
 
-<input
 
-placeholder="Hours"
+                  <p className="text-slate-300">
+                    ⏱ {lesson.hours} Hours
+                  </p>
 
-type="number"
 
-value={hours}
+                  <p className="text-slate-400 text-sm mt-2">
 
-onChange={
-e=>setHours(e.target.value)
-}
+                    📅
 
-className="bg-slate-700 text-white p-3 rounded-lg"
+                    {
+                      lesson.date
+                      ?
+                      new Date(
+                        lesson.date
+                      ).toLocaleDateString(
+                        "en-GB"
+                      )
+                      :
+                      "-"
+                    }
 
-/>
+                  </p>
 
 
+                </div>
 
+              ))
+            }
 
+            </div>
 
+          }
 
 
-<button
+        </div>
 
-onClick={saveLesson}
 
-className="bg-blue-600 hover:bg-blue-700 text-white font-bold p-3 rounded-lg"
+      </div>
 
->
+    </main>
 
-{
-editId
-? "Save Changes"
-: "Add Lesson"
-}
-
-</button>
-
-
-
-
-
-{
-editId &&
-
-<button
-
-onClick={clearForm}
-
-className="bg-gray-600 text-white font-bold p-3 rounded-lg"
-
->
-
-Cancel
-
-</button>
-
-}
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-
-<div className="bg-slate-800 rounded-2xl p-6">
-
-
-
-<div className="flex justify-between mb-5">
-
-
-<h2 className="text-xl font-bold text-white">
-
-📖 Lesson History ({lessons.length})
-
-</h2>
-
-
-
-<button
-
-onClick={()=>loadLessons(studentId)}
-
-className="bg-green-600 px-4 py-2 rounded-lg text-white"
-
->
-
-Refresh
-
-</button>
-
-
-
-</div>
-
-
-
-
-
-
-
-{
-lessons.length===0
-
-?
-
-<p className="text-slate-400">
-
-No lessons found
-
-</p>
-
-
-:
-
-
-<div className="grid gap-4">
-
-
-
-{
-lessons.map((lesson)=>(
-
-
-<div
-
-key={lesson.id}
-
-className="bg-slate-700 rounded-xl p-5 border border-slate-600"
-
->
-
-
-
-<div className="flex justify-between items-center">
-
-
-<h3 className="text-xl font-bold text-white">
-
-{lesson.title}
-
-</h3>
-
-
-
-<div className="flex gap-2">
-
-
-
-<button
-
-onClick={()=>editLesson(lesson)}
-
-className="bg-yellow-500 px-4 py-2 rounded-lg text-white"
-
->
-
-Edit
-
-</button>
-
-
-
-
-
-<button
-
-onClick={()=>deleteLesson(lesson.id)}
-
-className="bg-red-600 px-4 py-2 rounded-lg text-white"
-
->
-
-Delete
-
-</button>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-<p className="text-slate-300 mt-3">
-
-👨‍🏫 {lesson.teacher}
-
-</p>
-
-
-
-<p className="text-slate-300">
-
-⏱ {lesson.hours} Hours
-
-</p>
-
-
-
-
-<p className="text-slate-400 text-sm mt-2">
-
-📅 {
-
-lesson.date
-
-?
-
-new Date(
-lesson.date
-).toLocaleDateString(
-"en-GB"
-)
-
-:
-
-"-"
-
-}
-
-</p>
-
-
-
-
-</div>
-
-
-))
-
-}
-
-
-
-</div>
-
-
-}
-
-
-
-</div>
-
-
-
-
-
-
-</div>
-
-</main>
-
-
-);
-
+  );
 
 }

@@ -3,221 +3,163 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-
-export default function EditStudentPage(){
-
+export default function EditStudentPage() {
   const params = useParams();
-
   const router = useRouter();
 
+  const API_URL =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:3002";
 
-  const studentId =
-    String(params.studentId);
+  const studentId = String(params.studentId);
 
-
-
-  const [form,setForm] = useState<any>({
-
-    fullName:"",
-    certificateName:"",
-    email:"",
-    phone:"",
-    languages:"",
-    packageHours:"",
-    packagePrice:"",
-
+  const [form, setForm] = useState<any>({
+    fullName: "",
+    certificateName: "",
+    email: "",
+    phone: "",
+    languages: "",
+    packageHours: "",
+    packagePrice: "",
   });
 
+  const [loading, setLoading] = useState(true);
 
 
-  const [loading,setLoading] = useState(true);
-
-
-
-
-  useEffect(()=>{
-
+  useEffect(() => {
     loadStudent();
-
-  },[]);
-
+  }, []);
 
 
-
-
-
-  async function loadStudent(){
-
-    const res =
-      await fetch(
-        "http://localhost:3002/students"
+  async function loadStudent() {
+    try {
+      const res = await fetch(
+        `${API_URL}/students`,
+        {
+          cache: "no-store",
+        }
       );
 
-
-    const students =
-      await res.json();
+      const students = await res.json();
 
 
-
-    const student =
-      students.find(
-        (s:any)=>
+      const student = students.find(
+        (s: any) =>
           s.studentId === studentId
       );
 
 
+      if (student) {
+        setForm({
+          fullName: student.fullName || "",
+          certificateName:
+            student.certificateName || "",
+          email: student.email || "",
+          phone: student.phone || "",
+          languages:
+            student.languages || "",
+          packageHours:
+            student.packageHours || "",
+          packagePrice:
+            student.packagePrice || "",
+        });
+      }
 
-    if(student){
+    } catch (error) {
+      console.log(error);
+      alert("Cannot load student");
+    }
+    finally {
+      setLoading(false);
+    }
+  }
 
-      setForm({
 
-        fullName:
-          student.fullName || "",
 
-        certificateName:
-          student.certificateName || "",
+  function handleChange(e: any) {
+    setForm({
+      ...form,
+      [e.target.name]:
+        e.target.value,
+    });
+  }
 
-        email:
-          student.email || "",
 
-        phone:
-          student.phone || "",
 
-        languages:
-          student.languages || "",
+  async function saveStudent() {
 
-        packageHours:
-          student.packageHours || "",
+    try {
 
-        packagePrice:
-          student.packagePrice || "",
+      const res = await fetch(
+        `${API_URL}/students/${studentId}`,
+        {
+          method: "PUT",
 
-      });
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
+
+          body:
+            JSON.stringify(form),
+        }
+      );
+
+
+      if(!res.ok){
+        throw new Error(
+          "Update failed"
+        );
+      }
+
+
+      alert(
+        "Student updated successfully"
+      );
+
+
+      router.push(
+        `/admin/students/${studentId}`
+      );
+
+
+    } catch(error){
+
+      console.log(error);
+
+      alert(
+        "Cannot update student"
+      );
 
     }
 
-
-
-    setLoading(false);
-
-
   }
 
 
 
-
-
-
-
-  function handleChange(
-    e:any
-  ){
-
-    setForm({
-
-      ...form,
-
-      [e.target.name]:
-        e.target.value,
-
-    });
-
-
-  }
-
-
-
-
-
-
-  async function saveStudent(){
-
-
-    await fetch(
-
-      `http://localhost:3002/students/${studentId}`,
-
-      {
-
-        method:"PUT",
-
-        headers:{
-
-          "Content-Type":
-          "application/json",
-
-        },
-
-
-        body:
-          JSON.stringify(form),
-
-      }
-
-    );
-
-
-
-    alert(
-      "Student updated successfully"
-    );
-
-
-
-    router.push(
-      `/admin/students/${studentId}`
-    );
-
-
-  }
-
-
-
-
-
-
-
-  if(loading){
-
+  if (loading) {
     return (
-
       <main className="bg-slate-900 min-h-screen p-10">
-
         <p className="text-white">
-
           Loading...
-
         </p>
-
       </main>
-
     );
-
   }
-
-
-
 
 
 
   return (
-
     <main className="min-h-screen bg-slate-900 p-10">
-
 
       <div className="max-w-3xl mx-auto">
 
 
         <h1 className="text-4xl font-bold text-white mb-8">
-
           ✏️ Edit Student
-
         </h1>
 
 
-
         <div className="bg-slate-800 rounded-2xl p-8 space-y-5">
-
 
 
           <Input
@@ -228,14 +170,12 @@ export default function EditStudentPage(){
           />
 
 
-
           <Input
             label="📜 Certificate Name"
             name="certificateName"
             value={form.certificateName}
             onChange={handleChange}
           />
-
 
 
           <Input
@@ -246,14 +186,12 @@ export default function EditStudentPage(){
           />
 
 
-
           <Input
             label="📱 Phone"
             name="phone"
             value={form.phone}
             onChange={handleChange}
           />
-
 
 
           <Input
@@ -264,14 +202,12 @@ export default function EditStudentPage(){
           />
 
 
-
           <Input
             label="📦 Package Hours"
             name="packageHours"
             value={form.packageHours}
             onChange={handleChange}
           />
-
 
 
           <Input
@@ -283,12 +219,8 @@ export default function EditStudentPage(){
 
 
 
-
-
           <button
-
             onClick={saveStudent}
-
             className="
             bg-blue-600
             hover:bg-blue-700
@@ -298,67 +230,40 @@ export default function EditStudentPage(){
             rounded-xl
             w-full
             "
-
           >
-
             💾 Save Changes
-
           </button>
-
 
 
         </div>
 
-
       </div>
 
-
     </main>
-
   );
-
-
 }
 
 
 
-
-
-
-
 function Input({
-
   label,
-
   name,
-
   value,
-
   onChange,
-
-}:any){
-
+}: any) {
 
   return (
-
     <div>
 
-
       <label className="text-white block mb-2">
-
         {label}
-
       </label>
 
 
       <input
-
         name={name}
-
         value={value}
-
         onChange={onChange}
-
         className="
         w-full
         bg-slate-700
@@ -366,12 +271,8 @@ function Input({
         p-3
         rounded-lg
         "
-
       />
 
-
     </div>
-
   );
-
 }
