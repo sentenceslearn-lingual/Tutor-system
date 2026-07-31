@@ -6,3 +6,16 @@ datasource db {
   provider = "sqlite"
   url      = "file:./dev.db"
 }
+
+model Student {
+  id                Int      @id @default(autoincrement())
+  studentId         String   @unique
+  fullName          String
+  certificateName   String
+  email             String   @unique
+  phone             String
+  languages         String
+  packageHours      Int
+  packagePrice      Int
+  createdAt         DateTime @default(now())
+}
