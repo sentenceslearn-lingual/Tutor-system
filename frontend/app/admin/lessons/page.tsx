@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { API_URL } from "@/lib/api";
 
-export default function LessonsPage() {
+function LessonsPageContent() {
 
 
   const searchParams = useSearchParams();
@@ -538,4 +538,12 @@ export default function LessonsPage() {
 
   );
 
+}
+
+export default function LessonsPage() {
+  return (
+    <Suspense fallback={<div className="p-10 text-white">Loading...</div>}>
+      <LessonsPageContent />
+    </Suspense>
+  );
 }
