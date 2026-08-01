@@ -17,6 +17,7 @@ model Student {
   languages       String
   packageHours    Int
   packagePrice    Int
+  paymentStatus   String   @default("pending")
   createdAt       DateTime @default(now())
   lessons         Lesson[]
 }
@@ -29,4 +30,22 @@ model Lesson {
   date      DateTime @default(now())
   studentId Int
   student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  tutorId   Int?
+  tutor     Tutor?   @relation(fields: [tutorId], references: [id], onDelete: SetNull)
+}
+
+model Admin {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+}
+
+model Tutor {
+  id         Int      @id @default(autoincrement())
+  name       String
+  languages  String
+  expertise  String
+  bio        String?
+  createdAt  DateTime @default(now())
+  lessons    Lesson[]
 }

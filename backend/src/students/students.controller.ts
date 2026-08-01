@@ -6,6 +6,7 @@ import {
   Param,
   Post,
   Put,
+  Patch,
 } from '@nestjs/common';
 
 import { StudentsService } from './students.service';
@@ -70,6 +71,18 @@ export class StudentsController {
 
 
 
+
+
+  @Patch(':id/payment')
+  async updatePaymentStatus(
+    @Param('id') id: string,
+    @Body() data: { paymentStatus: string },
+  ) {
+    return await this.studentsService.updatePaymentStatus(
+      id,
+      data.paymentStatus,
+    );
+  }
 
 
 

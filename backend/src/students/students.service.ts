@@ -91,6 +91,27 @@ export class StudentsService {
     };
   }
 
+
+  async updatePaymentStatus(
+    id: string,
+    paymentStatus: string,
+  ) {
+    const student =
+      await this.prisma.student.update({
+        where: {
+          studentId: id,
+        },
+        data: {
+          paymentStatus,
+        },
+      });
+
+    return {
+      message: 'Payment status updated successfully',
+      student,
+    };
+  }
+
   async deleteStudent(
     id: string,
   ) {
