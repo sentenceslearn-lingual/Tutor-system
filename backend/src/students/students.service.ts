@@ -1,4 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+} from '@nestjs/common';
+
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -9,30 +14,52 @@ export class StudentsService {
 
   async registerStudent(data: any) {
     // ตรวจข้อมูลที่จำเป็น
+    if (!data.fullName?.trim()) {
+      throw new BadRequestException(
+        'Please enter your full name.',
+      );
+    }
+
+    if (!data.email?.trim()) {
+      throw new BadRequestException(
+        'Please enter your email.',
+      );
+    }
+
+    if (!data.phone?.trim()) {
+      throw new BadRequestException(
+        'Please enter your phone number.',
+      );
+    }
+
+    if (!data.languages?.trim()) {
+      throw new BadRequestException(
+        'Please select at least one language.',
+      );
+    }
+
     if (
-      !data.fullName?.trim() ||
-      !data.email?.trim() ||
-      !data.phone?.trim() ||
-      !data.languages?.trim() ||
       data.packageHours === undefined ||
       data.packagePrice === undefined
     ) {
-      throw new Error(
-        'Please fill in all required information',
+      throw new BadRequestException(
+        'Please select a learning package.',
       );
     }
+
+    const phone = data.phone.trim();
 
     // ตรวจว่าเบอร์โทรซ้ำหรือไม่
     const existingStudent =
       await this.prisma.student.findFirst({
         where: {
-          phone: data.phone.trim(),
+          phone: phone,
         },
       });
 
     if (existingStudent) {
-      throw new Error(
-        'This phone number is already registered',
+      throw new ConflictException(
+        'This phone number is already registered.',
       );
     }
 
@@ -73,7 +100,7 @@ export class StudentsService {
           certificateName:
             data.certificateName?.trim() || null,
           email: data.email.trim(),
-          phone: data.phone.trim(),
+          phone,
           languages: data.languages.trim(),
           packageHours: Number(data.packageHours),
           packagePrice: Number(data.packagePrice),
@@ -108,11 +135,14 @@ export class StudentsService {
           certificateName: data.certificateName,
           email: data.email,
           phone: data.phone,
+
           languages: data.languages,
+
           packageHours:
             data.packageHours !== undefined
               ? Number(data.packageHours)
               : undefined,
+
           packagePrice:
             data.packagePrice !== undefined
               ? Number(data.packagePrice)
