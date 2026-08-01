@@ -3,46 +3,30 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model Student {
-  id Int @id @default(autoincrement())
-
-  studentId String @unique
-
-  fullName String
-
+  id              Int      @id @default(autoincrement())
+  studentId       String   @unique
+  fullName        String
   certificateName String?
-
-  email String
-
-  phone String
-
-  languages String
-
-  packageHours Int
-
-  packagePrice Int
-
-  createdAt DateTime @default(now())
-
-  lessons Lesson[]
+  email           String
+  phone           String
+  languages       String
+  packageHours    Int
+  packagePrice    Int
+  createdAt       DateTime @default(now())
+  lessons         Lesson[]
 }
 
 model Lesson {
-  id Int @id @default(autoincrement())
-
-  title String
-
-  hours Int
-
-  teacher String
-
-  date DateTime @default(now())
-
+  id        Int      @id @default(autoincrement())
+  title     String
+  hours     Int
+  teacher   String
+  date      DateTime @default(now())
   studentId Int
-
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
