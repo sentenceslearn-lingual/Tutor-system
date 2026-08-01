@@ -4,268 +4,335 @@ import { useState } from 'react';
 import { API_URL } from '@/lib/api';
 
 const packageData = {
-'1': { hours: 1, price: 200, discount: 0 },
-'10': { hours: 10, price: 1900, discount: 5 },
-'20': { hours: 20, price: 3600, discount: 10 },
-'30': { hours: 30, price: 5100, discount: 15 },
+  '1': { hours: 1, price: 200, discount: 0 },
+  '10': { hours: 10, price: 1900, discount: 5 },
+  '20': { hours: 20, price: 3600, discount: 10 },
+  '30': { hours: 30, price: 5100, discount: 15 },
 };
 
 export default function RegistrationForm() {
-const [selectedPackage, setSelectedPackage] =
-useState<'1' | '10' | '20' | '30'>('1');
+  const [selectedPackage, setSelectedPackage] =
+    useState<'1' | '10' | '20' | '30'>('1');
 
-const [fullName, setFullName] = useState('');
-const [certificateName, setCertificateName] = useState('');
-const [email, setEmail] = useState('');
-const [phone, setPhone] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [certificateName, setCertificateName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
 
-const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
+  const [selectedLanguages, setSelectedLanguages] =
+    useState<string[]>([]);
 
-const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-const currentPackage = packageData[selectedPackage];
+  const currentPackage = packageData[selectedPackage];
 
-async function handleSubmit() {
-// Prevent duplicate submissions
-if (loading) return;
+  async function handleSubmit() {
+    // ป้องกันการกดปุ่มซ้ำ
+    if (loading) return;
 
-
-setLoading(true);
-
-const studentData = {
-  fullName,
-  certificateName,
-  email,
-  phone,
-  languages: selectedLanguages.join(', '),
-  packageHours: currentPackage.hours,
-  packagePrice: currentPackage.price,
-};
-
-try {
-  const response = await fetch(
-    `${API_URL}/students/register`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(studentData),
+    // ตรวจข้อมูลก่อนส่ง
+    if (!fullName.trim()) {
+      alert('Please enter your full name.');
+      return;
     }
-  );
 
-  const result = await response.json();
+    if (!email.trim()) {
+      alert('Please enter your email.');
+      return;
+    }
 
-  console.log(result);
+    if (!phone.trim()) {
+      alert('Please enter your phone number.');
+      return;
+    }
 
-  if (!response.ok) {
-    alert(
-      result.message ||
-        'Registration failed. Please try again.'
-    );
-    return;
+    if (selectedLanguages.length === 0) {
+      alert('Please select at least one language.');
+      return;
+    }
+
+    setLoading(true);
+
+    const studentData = {
+      fullName: fullName.trim(),
+      certificateName: certificateName.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      languages: selectedLanguages.join(', '),
+      packageHours: currentPackage.hours,
+      packagePrice: currentPackage.price,
+    };
+
+    try {
+      const response = await fetch(
+        `${API_URL}/students/register`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(studentData),
+        }
+      );
+
+      const result = await response.json();
+
+      console.log(result);
+
+      if (!response.ok) {
+        alert(
+          result.message ||
+            'Registration failed. Please try again.'
+        );
+        return;
+      }
+
+      alert(
+        `Registration successful!\n\nYour Student ID is: ${result.studentId}`
+      );
+
+      // ล้างข้อมูลหลังสมัครสำเร็จ
+      setFullName('');
+      setCertificateName('');
+      setEmail('');
+      setPhone('');
+      setSelectedLanguages([]);
+      setSelectedPackage('1');
+    } catch (error) {
+      console.error(error);
+
+      alert(
+        'Cannot connect to server. Please try again.'
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
-  alert(
-    `Registration successful!\n\nYour Student ID is: ${result.studentId}`
-  );
-
-} catch (error) {
-  console.error(error);
-
-  alert(
-    'Cannot connect to server. Please try again.'
-  );
-
-} finally {
-  setLoading(false);
-}
-
-
-}
-
-return ( <section
-   id="apply"
-   className="bg-white px-6 py-24"
- > <div className="mx-auto max-w-3xl">
-
-```
-    <div className="text-center">
-      <span className="text-sm font-semibold uppercase tracking-wider text-blue-600">
-        Apply for Lessons
-      </span>
-
-      <h3 className="mt-3 text-4xl font-bold text-gray-900">
-        Start Your Learning Journey
-      </h3>
-    </div>
-
-    <form
-      className="mt-12 space-y-8 rounded-3xl border border-gray-200 bg-white p-8 shadow-lg"
+  return (
+    <section
+      id="apply"
+      className="bg-white px-6 py-24"
     >
+      <div className="mx-auto max-w-3xl">
 
-      <div className="space-y-4">
-        <h4 className="text-xl font-semibold text-gray-900">
-          Personal Information
-        </h4>
+        <div className="text-center">
+          <span className="text-sm font-semibold uppercase tracking-wider text-blue-600">
+            Apply for Lessons
+          </span>
 
-        <input
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          placeholder="Full Name (Thai)"
-          className="w-full rounded-xl border border-gray-300 px-4 py-3"
-        />
-
-        <input
-          type="text"
-          value={certificateName}
-          onChange={(e) => setCertificateName(e.target.value)}
-          placeholder="Name for Certificate (English)"
-          className="w-full rounded-xl border border-gray-300 px-4 py-3"
-        />
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Email"
-            className="w-full rounded-xl border border-gray-300 px-4 py-3"
-          />
-
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Phone Number"
-            className="w-full rounded-xl border border-gray-300 px-4 py-3"
-          />
+          <h3 className="mt-3 text-4xl font-bold text-gray-900">
+            Start Your Learning Journey
+          </h3>
         </div>
-      </div>
 
-      <div className="space-y-4">
-        <h4 className="text-xl font-semibold text-gray-900">
-          Languages
-        </h4>
+        <form
+          className="mt-12 space-y-8 rounded-3xl border border-gray-200 bg-white p-8 shadow-lg"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit();
+          }}
+        >
 
-        <div className="grid gap-3 sm:grid-cols-2">
-          {[
-            'English',
-            'Chinese',
-            'Korean',
-            'Japanese',
-            'Thai',
-          ].map((language) => (
-            <label
-              key={language}
-              className="flex items-center gap-3 rounded-xl border border-gray-200 p-4"
-            >
+          {/* Personal Information */}
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold text-gray-900">
+              Personal Information
+            </h4>
+
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) =>
+                setFullName(e.target.value)
+              }
+              placeholder="Full Name (Thai)"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3"
+            />
+
+            <input
+              type="text"
+              value={certificateName}
+              onChange={(e) =>
+                setCertificateName(e.target.value)
+              }
+              placeholder="Name for Certificate (English)"
+              className="w-full rounded-xl border border-gray-300 px-4 py-3"
+            />
+
+            <div className="grid gap-4 md:grid-cols-2">
+
               <input
-                type="checkbox"
-                checked={selectedLanguages.includes(language)}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedLanguages([
-                      ...selectedLanguages,
-                      language,
-                    ]);
-                  } else {
-                    setSelectedLanguages(
-                      selectedLanguages.filter(
-                        (l) => l !== language
-                      )
-                    );
-                  }
-                }}
-                className="h-5 w-5"
+                type="email"
+                value={email}
+                onChange={(e) =>
+                  setEmail(e.target.value)
+                }
+                placeholder="Email"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3"
               />
 
-              <span>{language}</span>
-            </label>
-          ))}
-        </div>
-      </div>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) =>
+                  setPhone(e.target.value)
+                }
+                placeholder="Phone Number"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3"
+              />
 
-      <div className="space-y-4">
-        <h4 className="text-xl font-semibold text-gray-900">
-          Learning Package
-        </h4>
-
-        <select
-          value={selectedPackage}
-          onChange={(e) =>
-            setSelectedPackage(
-              e.target.value as '1' | '10' | '20' | '30'
-            )
-          }
-          className="w-full rounded-xl border border-gray-300 px-4 py-3"
-        >
-          <option value="1">
-            1 Hour - 200 THB
-          </option>
-
-          <option value="10">
-            10 Hours - 1,900 THB
-          </option>
-
-          <option value="20">
-            20 Hours - 3,600 THB
-          </option>
-
-          <option value="30">
-            30 Hours - 5,100 THB
-          </option>
-        </select>
-      </div>
-
-      <div className="rounded-2xl bg-blue-50 p-6">
-        <h4 className="text-xl font-semibold text-blue-700">
-          Package Summary
-        </h4>
-
-        <div className="mt-4 space-y-2 text-gray-700">
-
-          <div className="flex justify-between">
-            <span>Total Hours</span>
-            <span>
-              {currentPackage.hours} Hours
-            </span>
+            </div>
           </div>
 
-          <div className="flex justify-between">
-            <span>Discount</span>
-            <span>
-              {currentPackage.discount}%
-            </span>
+          {/* Languages */}
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold text-gray-900">
+              Languages
+            </h4>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+
+              {[
+                'English',
+                'Chinese',
+                'Korean',
+                'Japanese',
+                'Thai',
+              ].map((language) => (
+
+                <label
+                  key={language}
+                  className="flex items-center gap-3 rounded-xl border border-gray-200 p-4"
+                >
+
+                  <input
+                    type="checkbox"
+                    checked={selectedLanguages.includes(
+                      language
+                    )}
+                    onChange={(e) => {
+
+                      if (e.target.checked) {
+                        setSelectedLanguages([
+                          ...selectedLanguages,
+                          language,
+                        ]);
+                      } else {
+                        setSelectedLanguages(
+                          selectedLanguages.filter(
+                            (l) => l !== language
+                          )
+                        );
+                      }
+
+                    }}
+                    className="h-5 w-5"
+                  />
+
+                  <span>
+                    {language}
+                  </span>
+
+                </label>
+
+              ))}
+
+            </div>
           </div>
 
-          <div className="flex justify-between border-t pt-3 text-lg font-bold text-blue-700">
-            <span>Final Price</span>
+          {/* Learning Package */}
+          <div className="space-y-4">
+            <h4 className="text-xl font-semibold text-gray-900">
+              Learning Package
+            </h4>
 
-            <span>
-              {currentPackage.price.toLocaleString()} THB
-            </span>
+            <select
+              value={selectedPackage}
+              onChange={(e) =>
+                setSelectedPackage(
+                  e.target.value as
+                    | '1'
+                    | '10'
+                    | '20'
+                    | '30'
+                )
+              }
+              className="w-full rounded-xl border border-gray-300 px-4 py-3"
+            >
+
+              <option value="1">
+                1 Hour - 200 THB
+              </option>
+
+              <option value="10">
+                10 Hours - 1,900 THB
+              </option>
+
+              <option value="20">
+                20 Hours - 3,600 THB
+              </option>
+
+              <option value="30">
+                30 Hours - 5,100 THB
+              </option>
+
+            </select>
           </div>
 
-        </div>
+          {/* Package Summary */}
+          <div className="rounded-2xl bg-blue-50 p-6">
+
+            <h4 className="text-xl font-semibold text-blue-700">
+              Package Summary
+            </h4>
+
+            <div className="mt-4 space-y-2 text-gray-700">
+
+              <div className="flex justify-between">
+                <span>Total Hours</span>
+
+                <span>
+                  {currentPackage.hours} Hours
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span>Discount</span>
+
+                <span>
+                  {currentPackage.discount}%
+                </span>
+              </div>
+
+              <div className="flex justify-between border-t pt-3 text-lg font-bold text-blue-700">
+
+                <span>
+                  Final Price
+                </span>
+
+                <span>
+                  {currentPackage.price.toLocaleString()} THB
+                </span>
+
+              </div>
+
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-2xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
+          >
+            {loading
+              ? 'Submitting...'
+              : 'Continue to Payment'}
+          </button>
+
+        </form>
       </div>
-
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={loading}
-        className="w-full rounded-2xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-gray-400"
-      >
-        {loading
-          ? 'Submitting...'
-          : 'Continue to Payment'}
-      </button>
-
-    </form>
-  </div>
-</section>
-
-
-);
+    </section>
+  );
 }
