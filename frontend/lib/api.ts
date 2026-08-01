@@ -1,3 +1,3 @@
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:3002";
+  "https://tutor-system-api.onrender.com";
