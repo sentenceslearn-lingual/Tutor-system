@@ -1,3 +1,4 @@
+```tsx
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -104,9 +105,7 @@ function LessonsPageContent() {
 
       const data = await res.json();
 
-      setLessons(
-        Array.isArray(data) ? data : []
-      );
+      setLessons(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Cannot load lessons:", error);
       setLessons([]);
@@ -178,6 +177,7 @@ function LessonsPageContent() {
     setTitle(lesson.title || "");
     setTeacher(lesson.teacher || "");
     setHours(String(lesson.hours || ""));
+
     setTutorId(
       lesson.tutorId
         ? String(lesson.tutorId)
@@ -224,26 +224,27 @@ function LessonsPageContent() {
   }
 
   const selectedStudent = students.find(
-    (student) =>
-      student.studentId === studentId
+    (student) => student.studentId === studentId
   );
 
   return (
-    <main className="min-h-screen bg-slate-900 p-6 md:p-10">
-      <div className="mx-auto max-w-5xl">
+    <main className="min-h-screen bg-slate-900 px-4 py-6 sm:px-6 sm:py-8 md:p-10">
+      <div className="mx-auto w-full max-w-5xl">
 
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-white">
+        {/* Page Header */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl font-bold leading-tight text-white sm:text-3xl md:text-4xl">
             Lesson Management
           </h1>
 
-          <p className="mt-2 text-slate-400">
+          <p className="mt-2 text-sm leading-relaxed text-slate-400 sm:text-base">
             Manage student lessons and tutor assignments.
           </p>
         </div>
 
-        <div className="mb-8 rounded-2xl bg-slate-800 p-6">
-          <h2 className="mb-5 text-xl font-bold text-white">
+        {/* Student Selection */}
+        <div className="mb-6 rounded-2xl bg-slate-800 p-4 sm:mb-8 sm:p-6">
+          <h2 className="mb-4 text-lg font-bold text-white sm:mb-5 sm:text-xl">
             Student
           </h2>
 
@@ -262,7 +263,7 @@ function LessonsPageContent() {
               }
             }}
             disabled={loadingStudents}
-            className="w-full rounded-lg bg-slate-700 p-3 text-white"
+            className="w-full min-w-0 rounded-lg bg-slate-700 p-3 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
           >
             <option value="">
               {loadingStudents
@@ -282,14 +283,14 @@ function LessonsPageContent() {
 
           {selectedStudent && (
             <div className="mt-4 rounded-xl bg-slate-700 p-4">
-              <p className="text-slate-300">
+              <p className="break-words text-sm text-slate-300 sm:text-base">
                 Name:
                 <span className="ml-2 font-bold text-white">
                   {selectedStudent.fullName}
                 </span>
               </p>
 
-              <p className="mt-1 text-slate-300">
+              <p className="mt-2 break-all text-sm text-slate-300 sm:text-base">
                 Student ID:
                 <span className="ml-2 font-bold text-blue-400">
                   {selectedStudent.studentId}
@@ -299,40 +300,33 @@ function LessonsPageContent() {
           )}
         </div>
 
-        <div className="mb-8 rounded-2xl bg-slate-800 p-6">
-          <h2 className="mb-5 text-xl font-bold text-white">
-            {editId
-              ? "Edit Lesson"
-              : "Add New Lesson"}
+        {/* Add / Edit Lesson */}
+        <div className="mb-6 rounded-2xl bg-slate-800 p-4 sm:mb-8 sm:p-6">
+          <h2 className="mb-4 text-lg font-bold text-white sm:mb-5 sm:text-xl">
+            {editId ? "Edit Lesson" : "Add New Lesson"}
           </h2>
 
-          <div className="grid gap-4">
+          <div className="grid gap-3 sm:gap-4">
 
             <input
               placeholder="Lesson title"
               value={title}
-              onChange={(e) =>
-                setTitle(e.target.value)
-              }
-              className="rounded-lg bg-slate-700 p-3 text-white placeholder-slate-400"
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full min-w-0 rounded-lg bg-slate-700 p-3 text-sm text-white outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 sm:text-base"
             />
 
             <input
               placeholder="Teacher"
               value={teacher}
-              onChange={(e) =>
-                setTeacher(e.target.value)
-              }
-              className="rounded-lg bg-slate-700 p-3 text-white placeholder-slate-400"
+              onChange={(e) => setTeacher(e.target.value)}
+              className="w-full min-w-0 rounded-lg bg-slate-700 p-3 text-sm text-white outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 sm:text-base"
             />
 
             <select
               value={tutorId}
-              onChange={(e) =>
-                setTutorId(e.target.value)
-              }
+              onChange={(e) => setTutorId(e.target.value)}
               disabled={loadingTutors}
-              className="rounded-lg bg-slate-700 p-3 text-white"
+              className="w-full min-w-0 rounded-lg bg-slate-700 p-3 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500 sm:text-base"
             >
               <option value="">
                 {loadingTutors
@@ -359,29 +353,25 @@ function LessonsPageContent() {
               min="0.5"
               step="0.5"
               value={hours}
-              onChange={(e) =>
-                setHours(e.target.value)
-              }
-              className="rounded-lg bg-slate-700 p-3 text-white placeholder-slate-400"
+              onChange={(e) => setHours(e.target.value)}
+              className="w-full min-w-0 rounded-lg bg-slate-700 p-3 text-sm text-white outline-none placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 sm:text-base"
             />
 
-            <div className="flex gap-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3">
 
               <button
                 type="button"
                 onClick={saveLesson}
-                className="flex-1 rounded-lg bg-blue-600 p-3 font-bold text-white hover:bg-blue-700"
+                className="w-full rounded-lg bg-blue-600 p-3 text-sm font-bold text-white transition hover:bg-blue-700 sm:text-base"
               >
-                {editId
-                  ? "Save Changes"
-                  : "Add Lesson"}
+                {editId ? "Save Changes" : "Add Lesson"}
               </button>
 
               {editId && (
                 <button
                   type="button"
                   onClick={clearForm}
-                  className="rounded-lg bg-slate-600 px-6 font-bold text-white hover:bg-slate-500"
+                  className="w-full rounded-lg bg-slate-600 p-3 text-sm font-bold text-white transition hover:bg-slate-500 sm:text-base"
                 >
                   Cancel
                 </button>
@@ -391,20 +381,19 @@ function LessonsPageContent() {
           </div>
         </div>
 
-        <div className="rounded-2xl bg-slate-800 p-6">
+        {/* Lesson History */}
+        <div className="rounded-2xl bg-slate-800 p-4 sm:p-6">
 
-          <div className="mb-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-            <h2 className="text-xl font-bold text-white">
+            <h2 className="text-lg font-bold text-white sm:text-xl">
               Lesson History ({lessons.length})
             </h2>
 
             <button
               type="button"
-              onClick={() =>
-                loadLessons(studentId)
-              }
-              className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+              onClick={() => loadLessons(studentId)}
+              className="w-full rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-green-700 sm:w-auto"
             >
               Refresh
             </button>
@@ -412,82 +401,76 @@ function LessonsPageContent() {
           </div>
 
           {!studentId ? (
-            <p className="text-slate-400">
+            <p className="text-sm text-slate-400 sm:text-base">
               Select a student to view lessons.
             </p>
           ) : lessons.length === 0 ? (
-            <p className="text-slate-400">
+            <p className="text-sm text-slate-400 sm:text-base">
               No lessons found for this student.
             </p>
           ) : (
-            <div className="grid gap-4">
+            <div className="grid gap-3 sm:gap-4">
 
               {lessons.map((lesson) => (
                 <div
                   key={lesson.id}
-                  className="rounded-xl border border-slate-600 bg-slate-700 p-5"
+                  className="min-w-0 rounded-xl border border-slate-600 bg-slate-700 p-4 sm:p-5"
                 >
 
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="flex min-w-0 flex-col gap-4 md:flex-row md:items-start md:justify-between">
 
-                    <div>
+                    <div className="min-w-0">
 
-                      <h3 className="text-xl font-bold text-white">
+                      <h3 className="break-words text-lg font-bold text-white sm:text-xl">
                         {lesson.title}
                       </h3>
 
-                      <p className="mt-2 text-slate-300">
+                      <p className="mt-2 break-words text-sm text-slate-300 sm:text-base">
                         Teacher:{" "}
                         <span className="text-white">
                           {lesson.teacher || "-"}
                         </span>
                       </p>
 
-                      <p className="mt-1 text-slate-300">
+                      <p className="mt-1 break-words text-sm text-slate-300 sm:text-base">
                         Tutor:{" "}
                         <span className="font-semibold text-blue-400">
                           {lesson.tutor?.name || "-"}
                         </span>
                       </p>
 
-                      <p className="mt-1 text-slate-300">
+                      <p className="mt-1 text-sm text-slate-300 sm:text-base">
                         Hours:{" "}
                         <span className="text-white">
                           {lesson.hours}
                         </span>
                       </p>
 
-                      <p className="mt-2 text-sm text-slate-400">
+                      <p className="mt-2 text-xs text-slate-400 sm:text-sm">
                         Date:{" "}
                         {lesson.date
                           ? new Date(
                               lesson.date
-                            ).toLocaleDateString(
-                              "en-GB"
-                            )
+                            ).toLocaleDateString("en-GB")
                           : "-"}
                       </p>
 
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="grid grid-cols-2 gap-2 md:flex md:shrink-0">
 
                       <button
                         type="button"
-                        onClick={() =>
-                          editLesson(lesson)
-                        }
-                        className="rounded-lg bg-yellow-500 px-4 py-2 font-semibold text-white hover:bg-yellow-600"
+                        onClick={() => editLesson(lesson)}
+                        className="w-full rounded-lg bg-yellow-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-yellow-600 md:w-auto"
                       >
                         Edit
                       </button>
 
                       <button
                         type="button"
-                        onClick={() =>
-                          deleteLesson(lesson.id)
-                        }
-                        className="rounded-lg bg-red-600 px-4 py-2 font-semibold text-white hover:bg-red-700"
+                        onClick={() => deleteLesson(lesson.id)}
+                        className="w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700 md:w-auto"
                       >
                         Delete
                       </button>
@@ -512,7 +495,7 @@ export default function LessonsPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-slate-900 p-10">
+        <main className="min-h-screen bg-slate-900 px-4 py-6 sm:px-6 sm:py-10">
           <p className="text-white">
             Loading lessons...
           </p>
@@ -523,3 +506,4 @@ export default function LessonsPage() {
     </Suspense>
   );
 }
+```
