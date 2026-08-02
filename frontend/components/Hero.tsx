@@ -8,17 +8,17 @@ export default function Hero() {
 
       <div className="relative z-10 max-w-4xl px-6 text-center">
         <span className="rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-medium text-blue-700 shadow-sm">
-          Personalized Language Learning
+          Personalized Private Tutoring
         </span>
 
         <h2 className="mt-8 text-5xl font-extrabold leading-tight text-gray-900 md:text-7xl">
-          Learn Languages <br />
-          <span className="text-blue-700">with Confidence</span>
+          Private Tutoring, <br />
+          <span className="text-blue-700">For You.</span>
         </h2>
 
         <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600 md:text-xl">
-          Private tutoring designed for real progress in English, Chinese,
-          Korean, Japanese, and Thai.
+          Private tutoring designed for real progress — from languages and
+          academic subjects to the skills you want to master.
         </p>
 
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
