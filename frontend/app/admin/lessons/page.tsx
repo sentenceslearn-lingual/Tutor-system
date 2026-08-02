@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
@@ -511,4 +510,3 @@ export default function LessonsPage() {
     </Suspense>
   );
 }
-
