@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -9,6 +10,15 @@ const packageData = {
   '20': { hours: 20, price: 3600, discount: 10 },
   '30': { hours: 30, price: 5100, discount: 15 },
 };
+
+const languageOptions = [
+  'English',
+  'Chinese',
+  'Korean',
+  'Japanese',
+  'Thai',
+  'Other',
+];
 
 export default function RegistrationForm() {
   const [selectedPackage, setSelectedPackage] =
@@ -22,15 +32,32 @@ export default function RegistrationForm() {
   const [selectedLanguages, setSelectedLanguages] =
     useState<string[]>([]);
 
+  const [otherLanguage, setOtherLanguage] = useState('');
+
   const [loading, setLoading] = useState(false);
 
   const currentPackage = packageData[selectedPackage];
 
+  function toggleLanguage(language: string) {
+    if (selectedLanguages.includes(language)) {
+      setSelectedLanguages(
+        selectedLanguages.filter((l) => l !== language)
+      );
+
+      if (language === 'Other') {
+        setOtherLanguage('');
+      }
+    } else {
+      setSelectedLanguages([
+        ...selectedLanguages,
+        language,
+      ]);
+    }
+  }
+
   async function handleSubmit() {
-    // ป้องกันการกดปุ่มซ้ำ
     if (loading) return;
 
-    // ตรวจข้อมูลก่อนส่ง
     if (!fullName.trim()) {
       alert('Please enter your full name.');
       return;
@@ -51,14 +78,29 @@ export default function RegistrationForm() {
       return;
     }
 
+    if (
+      selectedLanguages.includes('Other') &&
+      !otherLanguage.trim()
+    ) {
+      alert('Please specify the other language.');
+      return;
+    }
+
     setLoading(true);
+
+    const languageList = selectedLanguages.map(
+      (language) =>
+        language === 'Other'
+          ? otherLanguage.trim()
+          : language
+    );
 
     const studentData = {
       fullName: fullName.trim(),
       certificateName: certificateName.trim(),
       email: email.trim(),
       phone: phone.trim(),
-      languages: selectedLanguages.join(', '),
+      languages: languageList.join(', '),
       packageHours: currentPackage.hours,
       packagePrice: currentPackage.price,
     };
@@ -91,12 +133,12 @@ export default function RegistrationForm() {
         `Registration successful!\n\nYour Student ID is: ${result.studentId}`
       );
 
-      // ล้างข้อมูลหลังสมัครสำเร็จ
       setFullName('');
       setCertificateName('');
       setEmail('');
       setPhone('');
       setSelectedLanguages([]);
+      setOtherLanguage('');
       setSelectedPackage('1');
     } catch (error) {
       console.error(error);
@@ -193,17 +235,11 @@ export default function RegistrationForm() {
 
             <div className="grid gap-3 sm:grid-cols-2">
 
-              {[
-                'English',
-                'Chinese',
-                'Korean',
-                'Japanese',
-                'Thai',
-              ].map((language) => (
+              {languageOptions.map((language) => (
 
                 <label
                   key={language}
-                  className="flex items-center gap-3 rounded-xl border border-gray-200 p-4"
+                  className="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 p-4"
                 >
 
                   <input
@@ -211,22 +247,9 @@ export default function RegistrationForm() {
                     checked={selectedLanguages.includes(
                       language
                     )}
-                    onChange={(e) => {
-
-                      if (e.target.checked) {
-                        setSelectedLanguages([
-                          ...selectedLanguages,
-                          language,
-                        ]);
-                      } else {
-                        setSelectedLanguages(
-                          selectedLanguages.filter(
-                            (l) => l !== language
-                          )
-                        );
-                      }
-
-                    }}
+                    onChange={() =>
+                      toggleLanguage(language)
+                    }
                     className="h-5 w-5"
                   />
 
@@ -239,6 +262,18 @@ export default function RegistrationForm() {
               ))}
 
             </div>
+
+            {selectedLanguages.includes('Other') && (
+              <input
+                type="text"
+                value={otherLanguage}
+                onChange={(e) =>
+                  setOtherLanguage(e.target.value)
+                }
+                placeholder="Please specify"
+                className="w-full rounded-xl border border-gray-300 px-4 py-3"
+              />
+            )}
           </div>
 
           {/* Learning Package */}
@@ -336,3 +371,4 @@ export default function RegistrationForm() {
     </section>
   );
 }
+
